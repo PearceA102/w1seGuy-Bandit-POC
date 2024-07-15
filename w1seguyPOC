@@ -11,7 +11,7 @@ def server_connect(server):
 		print('SUCCESS')
 		print('\n',server_msg)
 
-
+		xor_op(sock, server_msg)
 	except socket.error as err:
 		print(f'Failed to connect: Error {err}')
 		main()
@@ -23,12 +23,15 @@ def xor_op(sock, server_msg):
 
 	key1 = xor(enc_hash[:4], b'THM{')
 	key2 = xor(enc_hash[-1:], b'}')
-	full_key = (str(key1).decode(),str(key2).decode())
+	full_key = (key1.decode()+key2.decode())
 	enc_key = full_key.encode()
 	result = xor(enc_hash, enc_key)
-	print(result)
+	print(f'The decoded input is: {result.decode()}\nKey: {full_key}')
+	key_send = full_key + '\n'
+	sock.recv(1024)
+	sock.sendall(key_send.encode())
+	print(sock.recv(1024).decode())
 	
-
 
 def main():
 	target = input('Enter target: ')
@@ -36,5 +39,5 @@ def main():
 	server = (target,port)
 	print(f'Attempting to connect to server...\n')
 	server_connect(server)
-	xor(sock)
+	
 main()
